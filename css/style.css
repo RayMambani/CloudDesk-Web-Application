@@ -114,8 +114,8 @@ p { margin: 0 0 .75em; }
 .dropdown-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .dropdown-head.stack { align-items: flex-start; }
 .note { border-bottom: 1px solid var(--border); }
-.note .note-title { display: block; font-weight: 600; font-size: .85rem; }
-.note .note-body { display: block; color: var(--muted); font-size: .8rem; }
+.note .note-title { display: block; font-weight: 600; font-size: .85rem; overflow-wrap: anywhere; }
+.note .note-body { display: block; color: var(--muted); font-size: .8rem; white-space: normal; overflow-wrap: anywhere; }
 .note.unread { background: rgba(79,70,229,.12); }
 
 /* ---- Cards ---- */
@@ -291,6 +291,9 @@ th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size
     .ticket-row { flex-direction: column; }
     .ticket-row .tags { flex-direction: row; align-items: center; }
     .container { padding: 16px 14px 50px; }
+    /* Notification panel: span the screen so the text is never cut off on phones. */
+    .dropdown-wide { position: fixed; left: 12px; right: 12px; top: 66px; width: auto; max-width: none; }
+    #bellList { max-height: 65vh; overflow-y: auto; }
 }
 
 /* ---- Print (Performance report -> "Save as PDF") ---- */
