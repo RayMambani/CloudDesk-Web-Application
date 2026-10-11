@@ -249,13 +249,13 @@ th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size
 /* ---- Chat ---- */
 .chat-box { display: flex; flex-direction: column; height: min(60vh, 520px); }
 .chat-messages { flex: 1; overflow-y: auto; padding: 8px 2px; }
-.bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; margin-bottom: 10px; font-size: .92rem; word-wrap: break-word; }
+.bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; margin-bottom: 10px; font-size: .92rem; word-wrap: break-word; overflow-wrap: anywhere; }
 .bubble.sent { background: var(--primary); color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
 .bubble.received { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
 .bubble .who { font-size: .7rem; color: var(--secondary); font-weight: 700; }
 .bubble .time { font-size: .65rem; opacity: .7; margin-top: 2px; }
 .chat-input { display: flex; gap: 8px; margin-top: 8px; }
-.chat-input input { margin: 0; }
+.chat-input input { margin: 0; min-width: 0; }
 .online { color: var(--success); font-size: .8rem; font-weight: 600; }
 
 /* ---- FAQ ---- */
@@ -294,6 +294,10 @@ th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size
     /* Notification panel: span the screen so the text is never cut off on phones. */
     .dropdown-wide { position: fixed; left: 12px; right: 12px; top: 66px; width: auto; max-width: none; }
     #bellList { max-height: 65vh; overflow-y: auto; }
+    /* iPhone Safari zooms the whole page in when you tap a field whose text is smaller
+       than 16px, which is what cut the chat off. 16px stops that zoom. */
+    input[type=text], input[type=email], input[type=password], input[type=tel], input[type=search],
+    input[type=file], input[type=number], input[type=date], select, textarea { font-size: 16px; }
 }
 
 /* ---- Print (Performance report -> "Save as PDF") ---- */
