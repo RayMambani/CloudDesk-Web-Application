@@ -261,7 +261,10 @@ th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size
 /* ---- FAQ ---- */
 .faq-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; background: var(--card); overflow: hidden; }
 .faq-item summary { cursor: pointer; padding: 14px 16px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
-.faq-item summary::after { content: '+'; color: var(--secondary); font-size: 1.2rem; line-height: 1; }
+.faq-item summary { text-align: left; align-items: flex-start; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::marker { content: ''; }
+.faq-item summary::after { content: '+'; flex-shrink: 0; color: var(--secondary); font-size: 1.2rem; line-height: 1; }
 .faq-item[open] summary::after { content: '–'; }
 .faq-item .faq-body { padding: 0 16px 16px; color: var(--muted); }
 
