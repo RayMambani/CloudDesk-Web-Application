@@ -29,7 +29,7 @@ $current = basename($_SERVER['SCRIPT_NAME'] ?? '');
     <meta name="color-scheme" content="dark light">
     <title><?= $pageTitle ? h($pageTitle) . ' · ' : '' ?><?= h(APP_NAME) ?></title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%98%81%EF%B8%8F%3C/text%3E%3C/svg%3E">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?= (int)@filemtime(__DIR__ . '/../css/style.css') ?>">
 </head>
 <body class="<?= $guest ? 'guest' : 'app' ?>">
 <div id="offlineBanner" class="banner banner-warn" hidden><?= h(t('offline_banner')) ?></div>
