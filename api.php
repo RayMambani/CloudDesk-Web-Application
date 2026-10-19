@@ -433,6 +433,53 @@ switch ($action) {
     }
 
     // ---------------------------------------------------------------- chat
+    case 'server_info': {
+        $driver = dbDriver();
+        $host = '(local file)';
+        $dbUrl = getenv('DATABASE_URL');
+        if ($dbUrl) $host = parse_url($dbUrl, PHP_URL_HOST) . ' / ' . ltrim((string)parse_url($dbUrl, PHP_URL_PATH), '/');
+        elseif ($driver === 'mysql') $host = DB_HOST . ' / ' . DB_NAME;
+        $engine = ['pgsql' => 'PostgreSQL', 'mysql' => 'MySQL', 'sqlite' => 'SQLite'][$driver] ?? $driver;
+        $isAdmin = $me['role'] === 'admin';
+        $order = ['users' => 'id', 'tickets' => 'created_at', 'comments' => 'id', 'ticket_history' => 'id',
+                  'chat_messages' => 'id', 'notifications' => 'id', 'passkeys' => 'id', 'api_tokens' => 'id', 'api_throttle' => 'k'];
+        $secret = ['password', 'security_answer_hash', 'token_hash', 'public_key', 'credential_id'];
+        $publicCols = ['id','status','priority','category','role','active','kind','created_at','resolved_at','ticket_id','user_id','field','from_support','is_read','rating','fails','until_ts','sign_count','last_used_at'];
+        $ast = $db->prepare('SELECT kind, COUNT(*) AS c, MAX(last_used_at) AS lu FROM api_tokens WHERE user_id = ? GROUP BY kind');
+        $ast->execute([(int)$me['id']]);
+        $sess = 0; $dev = 0; $lastUsed = '';
+        foreach ($ast->fetchAll() as $row) {
+            if ($row['kind'] === 'device') $dev = (int)$row['c']; else { $sess = (int)$row['c']; $lastUsed = (string)($row['lu'] ?? ''); }
+        }
+        $auth = [
+            'service' => 'CloudDesk authentication (api.php)',
+            'signedInAs' => $me['email'], 'role' => $me['role'],
+            'passwordStorage' => 'bcrypt hash', 'tokenStorage' => 'SHA-256 hash only',
+            'activeSessions' => $sess, 'fingerprintDevices' => $dev, 'lastUsed' => $lastUsed,
+            'googleSignIn' => googleConfigured(), 'lockout' => '5 failed logins = 60 second lock',
+        ];
+        $tables = [];
+        foreach ($order as $name => $by) {
+            try {
+                $count = (int)$db->query("SELECT COUNT(*) FROM $name")->fetchColumn();
+                $rows = $db->query("SELECT * FROM $name ORDER BY $by DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Throwable $e) { $count = 0; $rows = []; }
+            $out = [];
+            foreach ($rows as $r) {
+                $line = [];
+                foreach ($r as $c => $v) {
+                    $v = (string)($v ?? '');
+                    if (!$isAdmin && !in_array($c, $publicCols, true)) $v = $v === '' ? '' : '••• hidden';
+                    elseif (in_array($c, $secret, true) && $v !== '') $v = substr($v, 0, 12) . '… (hidden)';
+                    elseif (mb_strlen($v) > 40) $v = mb_substr($v, 0, 40) . '…';
+                    $line[$c] = $v;
+                }
+                $out[] = $line;
+            }
+            $tables[] = ['name' => $name, 'count' => $count, 'rows' => $out];
+        }
+        apiOut(['ok' => true, 'engine' => $engine, 'host' => $host, 'serverTime' => nowStr(), 'canSeeAll' => $isAdmin, 'auth' => $auth, 'tables' => $tables]);
+    }
     case 'chat_send': {
         $text = inStr('message', 1000);
         if ($text === '') apiFail('missing_fields');
