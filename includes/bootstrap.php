@@ -8,7 +8,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
 
 // ---- Session (HttpOnly, SameSite=Lax; "Remember me" extends it) -------------
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE && !defined('CD_API')) {
     $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
     ini_set('session.use_strict_mode', '1');

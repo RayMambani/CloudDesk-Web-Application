@@ -280,3 +280,31 @@ function seedDemoData(PDO $db): void {
     $nIns = $db->prepare('INSERT INTO notifications (user_id,title,body,link,is_read,created_at) VALUES (?,?,?,?,?,?)');
     foreach ($notes as $n) { $nIns->execute($n); }
 }
+
+/** Tables used by the mobile-app API (api.php): login tokens and login throttling. */
+function apiSchemaStatements(string $driver): array {
+    $pk = match ($driver) {
+        'pgsql' => 'SERIAL PRIMARY KEY',
+        'sqlite' => 'INTEGER PRIMARY KEY AUTOINCREMENT',
+        default => 'INT AUTO_INCREMENT PRIMARY KEY',
+    };
+    $dt = $driver === 'pgsql' ? 'TIMESTAMP' : 'DATETIME';
+    $big = $driver === 'sqlite' ? 'INTEGER' : 'BIGINT';
+    $tail = $driver === 'mysql' ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' : '';
+    return [
+        "CREATE TABLE IF NOT EXISTS api_tokens (
+            id $pk,
+            user_id INT NOT NULL,
+            token_hash VARCHAR(64) NOT NULL UNIQUE,
+            kind VARCHAR(10) NOT NULL DEFAULT 'session',
+            created_at $dt NOT NULL,
+            last_used_at $dt NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )$tail",
+        "CREATE TABLE IF NOT EXISTS api_throttle (
+            k VARCHAR(191) PRIMARY KEY,
+            fails INT NOT NULL DEFAULT 0,
+            until_ts $big NOT NULL DEFAULT 0
+        )$tail",
+    ];
+}
